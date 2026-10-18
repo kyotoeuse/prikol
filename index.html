@@ -48,24 +48,42 @@
       opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(15px);
     }
 
+    /* ЧИТАЕМЫЙ ГЛАВНЫЙ ТЕКСТ */
     #finalText {
-      font-size: clamp(26px, 8vw, 48px); font-weight: 700; letter-spacing: 0.02em;
-      background: linear-gradient(135deg, #ffffff 0%, #a0c4ff 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      opacity: 0; transform: translateY(30px) scale(0.9);
+      font-size: clamp(32px, 9vw, 56px); 
+      font-weight: 900; 
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      
+      /* Жесткая черная тень для контраста + голубое свечение для стиля */
+      text-shadow: 
+        0 2px 4px rgba(0,0,0,0.9), 
+        0 4px 15px rgba(0,0,0,0.8), 
+        0 0 25px rgba(160, 196, 255, 0.6);
+      
+      opacity: 0; 
+      transform: translateY(30px) scale(0.9);
       transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-      filter: drop-shadow(0 10px 20px rgba(160, 196, 255, 0.4));
-      margin-bottom: 15px; white-space: nowrap;
+      margin-bottom: 15px; 
+      white-space: nowrap;
       will-change: transform, opacity;
     }
     #finalText.visible { opacity: 1; transform: translateY(0) scale(1); }
 
+    /* ЧИТАЕМЫЙ ШУТОЧНЫЙ ТЕКСТ */
     #jokeText {
-      font-size: clamp(14px, 4.5vw, 20px); font-weight: 400; color: #d0d0d0;
-      text-align: center; line-height: 1.4; opacity: 0;
+      font-size: clamp(16px, 5vw, 22px); 
+      font-weight: 600; 
+      color: #ffffff; /* Сделали белым */
+      text-align: center; 
+      line-height: 1.4; 
+      opacity: 0;
       transform: translateY(20px) scale(0.95);
       transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8); padding: 0 20px;
+      
+      /* Тень, чтобы текст не терялся на волосах */
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.8);
+      padding: 0 20px;
       will-change: transform, opacity;
     }
     #jokeText.visible { opacity: 1; transform: translateY(0) scale(1); }
@@ -252,45 +270,37 @@
         ctx.fillRect(0, 0, width, height);
         glowCtx.clearRect(0, 0, width, height);
 
-        // 1. Плавное появление фото (первые 2 секунды)
         const opacity = Math.min(1, elapsed / 2000);
-        
-        // 2. Медленный бесшовный зум (от 0.96 до 1.06 за 20 секунд)
         const zoomProgress = Math.min(1, elapsed / 20000);
         const currentScale = 0.96 + (zoomProgress * 0.10);
 
-        // Рисуем фото со статичным свечением (ореолом)
         ctx.save();
         ctx.globalAlpha = opacity;
         ctx.translate(width / 2, height / 2);
         ctx.scale(currentScale, currentScale);
         ctx.translate(-width / 2, -height / 2);
         
-        // Статичный свет
         ctx.shadowColor = "rgba(160, 196, 255, 0.25)";
         ctx.shadowBlur = 40;
         ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
         ctx.restore();
 
-        // Рисуем искры
         sparkles.forEach(s => {
           s.update(width, height);
           s.draw(glowCtx);
         });
 
-        // Включаем виньетку и тексты
         if (opacity >= 1 && !text2Shown) {
           text2Shown = true;
           vignette.classList.add("visible");
           controls.style.display = "block";
           
-          // Кнопка "Ещё раз" активна, только когда всё проявилось
           if (!running) {} else { running = false; }
 
           setTimeout(() => {
             finalText.classList.add("visible");
             try { tg?.HapticFeedback?.notificationOccurred("success"); } catch (_) {}
-          }, 200); // Небольшая задержка после проявления
+          }, 200);
         }
 
         if (elapsed > 4500 && !text3Shown) {
